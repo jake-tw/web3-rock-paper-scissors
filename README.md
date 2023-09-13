@@ -1,1 +1,1 @@
-# hardhat-smart-contract-demo
+# Web3 Rock Paper Scissors
