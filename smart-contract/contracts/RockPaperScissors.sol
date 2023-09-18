@@ -85,14 +85,17 @@ contract RockPaperScissors is
     }
 
     function matchGame(
-        uint id,
-        bytes32 throwHash
+        bytes32 throwHash,
+        uint id
     ) public gameExists(id) notBanker(id) notJudge {
         address player = msg.sender;
         GameInfo storage gameInfo = games[id];
 
         uint approval = ERC20(token).allowance(player, address(this));
-        require(approval >= gameInfo.stakes, "Not enough approval.");
+        uint _stakges = gameInfo.stakes;
+        require(approval >= _stakges, "Not enough approval.");
+
+        ERC20(token).transferFrom(player, address(this), _stakges);
 
         gameInfo.player = player;
         gameInfo.playerThrowHash = throwHash;
@@ -103,9 +106,9 @@ contract RockPaperScissors is
     function showdown(
         uint id,
         ThrowType bankerThrowType,
-        uint bankerSeed,
+        uint bankerSalt,
         ThrowType playThrowType,
-        uint playerSeed
+        uint playerSalt
     ) public isJudge {
         GameInfo storage gameInfo = games[id];
         address banker = gameInfo.banker;
@@ -115,7 +118,7 @@ contract RockPaperScissors is
                 gameInfo.bankerThrowHash,
                 banker,
                 bankerThrowType,
-                bankerSeed
+                bankerSalt
             ),
             "Banker throw type error."
         );
@@ -124,7 +127,7 @@ contract RockPaperScissors is
                 gameInfo.playerThrowHash,
                 player,
                 playThrowType,
-                playerSeed
+                playerSalt
             ),
             "Player throw type error."
         );
@@ -139,32 +142,32 @@ contract RockPaperScissors is
         }
         dropGame(id);
 
-        emit GameResult(winner, bankerSeed, playerSeed, id);
+        emit GameResult(winner, bankerSalt, playerSalt, id);
     }
 
     function encodeThrowHash(
         ThrowType throwType,
-        uint seed
+        uint salt
     ) public view returns (bytes32) {
         address sender = msg.sender;
-        return encodeThrowHash(sender, throwType, seed);
+        return encodeThrowHash(sender, throwType, salt);
     }
 
     function encodeThrowHash(
         address sender,
         ThrowType throwType,
-        uint seed
+        uint salt
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(sender, throwType, seed));
+        return keccak256(abi.encodePacked(sender, throwType, salt));
     }
 
     function verifyThrowHash(
         bytes32 throwHash,
         address sender,
         ThrowType throwType,
-        uint seed
+        uint salt
     ) public pure returns (bool) {
-        return throwHash == encodeThrowHash(sender, throwType, seed);
+        return throwHash == encodeThrowHash(sender, throwType, salt);
     }
 
     function refund(address banker, address player, uint stake) internal {
@@ -177,6 +180,7 @@ contract RockPaperScissors is
         uint stake
     ) internal returns (uint fee) {
         fee = (stake * 3) / 1000;
+        ERC20(token).transfer(owner(), fee);
         ERC20(token).transfer(winner, stake * 2 - fee);
     }
 
@@ -196,9 +200,9 @@ contract RockPaperScissors is
     function duel(
         ThrowType bankerThrowType,
         ThrowType playerThrowType
-    ) internal pure returns (WinnerType) {
-        uint a = uint(bankerThrowType);
-        uint b = uint(playerThrowType);
+    ) public pure returns (WinnerType) {
+        uint8 a = uint8(bankerThrowType);
+        uint8 b = uint8(playerThrowType);
         if (a == b) {
             return WinnerType.NONE;
         }
@@ -207,6 +211,14 @@ contract RockPaperScissors is
             return b == 2 ? WinnerType.BANKER : WinnerType.PLAYER;
         }
 
-        return a > b ? WinnerType.BANKER : WinnerType.PLAYER;
+        if (a == 1) {
+            return b == 0 ? WinnerType.BANKER : WinnerType.PLAYER;
+        }
+
+        if (a == 2) {
+            return b == 1 ? WinnerType.BANKER : WinnerType.PLAYER;
+        }
+
+        return WinnerType.NONE;
     }
 }

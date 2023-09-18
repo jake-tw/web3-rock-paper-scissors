@@ -6,7 +6,6 @@ pragma solidity ^0.8.9;
 // import "hardhat/console.sol";
 
 interface IRockPaperScissorsEvents {
-    event FeeUpdated(address indexed sender, uint from, uint to);
     event JudgeUpdated(address indexed sender, address from, address to);
     event GameSetup(
         address indexed banker,
@@ -21,8 +20,8 @@ interface IRockPaperScissorsEvents {
     );
     event GameResult(
         address indexed winer,
-        uint bankerSeed,
-        uint playerSeed,
+        uint bankerSalt,
+        uint playerSalt,
         uint indexed id
     );
 }
