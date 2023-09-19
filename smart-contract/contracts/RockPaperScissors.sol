@@ -105,34 +105,26 @@ contract RockPaperScissors is
 
     function showdown(
         uint id,
-        ThrowType bankerThrowType,
         uint bankerSalt,
-        ThrowType playThrowType,
         uint playerSalt
     ) public isJudge {
         GameInfo storage gameInfo = games[id];
         address banker = gameInfo.banker;
         address player = gameInfo.player;
-        require(
-            verifyThrowHash(
-                gameInfo.bankerThrowHash,
-                banker,
-                bankerThrowType,
-                bankerSalt
-            ),
-            "Banker throw type error."
-        );
-        require(
-            verifyThrowHash(
-                gameInfo.playerThrowHash,
-                player,
-                playThrowType,
-                playerSalt
-            ),
-            "Player throw type error."
+
+        ThrowType bankerThrowType = verifyThrowHash(
+            gameInfo.bankerThrowHash,
+            banker,
+            bankerSalt
         );
 
-        WinnerType winnerType = duel(bankerThrowType, playThrowType);
+        ThrowType playerThrowType = verifyThrowHash(
+            gameInfo.playerThrowHash,
+            player,
+            playerSalt
+        );
+
+        WinnerType winnerType = duel(bankerThrowType, playerThrowType);
         address winner;
         if (winnerType == WinnerType.NONE) {
             refund(banker, player, gameInfo.stakes);
@@ -164,10 +156,24 @@ contract RockPaperScissors is
     function verifyThrowHash(
         bytes32 throwHash,
         address sender,
-        ThrowType throwType,
         uint salt
-    ) public pure returns (bool) {
-        return throwHash == encodeThrowHash(sender, throwType, salt);
+    ) public pure returns (ThrowType result) {
+        if (throwHash == encodeThrowHash(sender, ThrowType.ROCK, salt)) {
+            result = ThrowType.ROCK;
+        } else if (
+            throwHash == encodeThrowHash(sender, ThrowType.PAPER, salt)
+        ) {
+            result = ThrowType.PAPER;
+        } else if (
+            throwHash == encodeThrowHash(sender, ThrowType.SCISSOR, salt)
+        ) {
+            result = ThrowType.SCISSOR;
+        } else {
+            require(
+                false,
+                string(abi.encodePacked("Throw type error: ", sender))
+            );
+        }
     }
 
     function refund(address banker, address player, uint stake) internal {

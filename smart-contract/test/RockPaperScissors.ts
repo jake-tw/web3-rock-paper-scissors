@@ -102,8 +102,8 @@ describe("RockPaperScissors", function () {
         .connect(banker)
         .encodeThrowHash(throwType, salt);
       expect(
-        await rockPaperScissors.verifyThrowHash(hash, banker, throwType, salt)
-      ).to.be.true;
+        await rockPaperScissors.verifyThrowHash(hash, banker, salt)
+      ).to.equals(throwType);
     });
 
     it("Should create the hash by library", async function () {
@@ -118,8 +118,8 @@ describe("RockPaperScissors", function () {
         [banker.address, throwType, salt]
       );
       expect(
-        await rockPaperScissors.verifyThrowHash(hash, banker, throwType, salt)
-      ).to.be.true;
+        await rockPaperScissors.verifyThrowHash(hash, banker, salt)
+      ).to.be.equal(throwType);
     });
 
     it("Rock should win scissor", async function () {
@@ -217,7 +217,7 @@ describe("RockPaperScissors", function () {
       const id = 1;
       await rockPaperScissors
         .connect(judge)
-        .showdown(id, bankerThrowType, bankerSalt, playerThrowType, playerSalt);
+        .showdown(id, bankerSalt, playerSalt);
       const length = await rockPaperScissors.allGameLength();
       expect(length).to.equal(0);
 
@@ -264,7 +264,7 @@ describe("RockPaperScissors", function () {
       // 3. judge showdown the result
       await rockPaperScissors
         .connect(judge)
-        .showdown(id, throwType, bankerSalt, throwType, playerSalt);
+        .showdown(id, bankerSalt, playerSalt);
 
       const originalSupply = await mockToken.ONE_UNIT();
 
@@ -314,13 +314,7 @@ describe("RockPaperScissors", function () {
       await expect(
         await rockPaperScissors
           .connect(judge)
-          .showdown(
-            id,
-            bankerThrowType,
-            bankerSalt,
-            playerThrowType,
-            playerSalt
-          ),
+          .showdown(id, bankerSalt, playerSalt),
         "GameResult event"
       )
         .to.emit(rockPaperScissors, "GameResult")
