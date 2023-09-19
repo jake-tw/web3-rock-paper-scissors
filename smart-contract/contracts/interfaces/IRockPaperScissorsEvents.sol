@@ -19,7 +19,7 @@ interface IRockPaperScissorsEvents {
         uint indexed id
     );
     event GameResult(
-        address indexed winer,
+        address indexed winner,
         uint bankerSalt,
         uint playerSalt,
         uint indexed id
