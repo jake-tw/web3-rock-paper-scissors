@@ -24,7 +24,7 @@ export class ValidationInfo {
 
   @Column({
     name: 'type',
-    type: 'enum',
+    enum: ValidationType,
     nullable: false,
     default: ValidationType.EMAIL,
   })

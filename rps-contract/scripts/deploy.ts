@@ -2,8 +2,8 @@ import { ethers } from "hardhat";
 
 async function main() {
   const [owner, judge] = await ethers.getSigners();
-  console.log(`Contract owner: ${owner}`);
-  console.log(`Game judge: ${judge}`);
+  console.log(`Contract owner: ${owner.address}`);
+  console.log(`Game judge: ${judge.address}`);
 
   const mockToken = await ethers.deployContract("MockToken");
   await mockToken.waitForDeployment();
@@ -15,7 +15,7 @@ async function main() {
 
   await rockPaperScissors.waitForDeployment();
 
-  console.log(`RockPaperScissors deployed to ${rockPaperScissors.target}`);
+  console.log(`RockPaperScissors contract address: ${rockPaperScissors.target}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

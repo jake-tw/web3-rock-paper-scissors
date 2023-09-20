@@ -29,11 +29,11 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     MailerModule.forRoot({
       transport: {
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT),
+        host: process.env[ConfigKey.SMTP_HOST],
+        port: Number(process.env[ConfigKey.SMTP_PORT]),
         auth: {
-          user: process.env.SMTP_AUTH_USER,
-          pass: process.env.SMTP_AUTH_PASS,
+          user: process.env[ConfigKey.SMTP_AUTH_USER],
+          pass: process.env[ConfigKey.SMTP_AUTH_PASS],
         },
       },
       defaults: {

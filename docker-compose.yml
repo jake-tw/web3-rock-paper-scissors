@@ -1,0 +1,53 @@
+version: '3'
+services:
+  # nginx:
+  #   image: nginx:stable-alpine
+  #   container_name: nginx
+  #   ports:
+  #     - "443:443"
+  #     - "80:80"
+  #   networks:
+  #     - local-bridge
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+  #     - ./nginx/ssl:/etc/nginx/ssl/
+  #     - ./nginx/log:/var/log/nginx/
+  rps-db:
+    image: postgres:12.16
+    restart: on-failure:5
+    container_name: rps-db
+    networks:
+      - local-bridge
+    env_file:
+      - ./.db.env
+    volumes:
+      - ./postgresql-data:/var/lib/postgresql/data
+  rps-pgadmin:
+    image: dpage/pgadmin4
+    restart: on-failure:5
+    container_name: rps-pgadmin
+    ports:
+      - "8080:80"
+    networks:
+      - local-bridge
+    env_file:
+      - ./.pgadmin.env
+  rps-contract:
+    image: rps-contract
+    container_name: rps-contract
+    restart: on-failure:5
+    networks:
+      - local-bridge
+  rps-backend:
+    image: rps-backend
+    container_name: rps-backend
+    ports:
+      - "3000:3000"
+    restart: on-failure:5
+    networks:
+      - local-bridge
+    env_file:
+      - ./rps-backend/.env
+
+networks:
+  local-bridge:
